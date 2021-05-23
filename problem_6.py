@@ -1,107 +1,65 @@
+def get_min_max(ints):
 
-class RouteTrie:
-    def __init__(self):
-        self.root = RouteTrieNode()
+    if ints is None or len(ints) == 0:
+        return (None, None)
 
-    def insert(self, path_list, handler):
-        current_node = self.root
-        for path_part in path_list:
-            current_node = current_node.insert(path_part)
+    # begin with min and max set to first element
+    mn = ints[0]
+    mx = ints[0]
 
-        current_node.handler = handler
+    # begin at index 1
+    for i in range(1, len(ints)):
+        n = ints[i]
+        if n < mn:
+            mn = n
+        if n > mx:
+            mx = n
 
-    def find(self, path_list):
-        current_node = self.root
-
-        for path_part in path_list:
-            current_node = current_node.insert(path_part)
-
-        return current_node
-
-
-class RouteTrieNode:
-    def __init__(self):
-        self.handler = None
-        self.children = {}
-
-    def insert(self, path_part):
-        if path_part not in self.children:
-            self.children[path_part] = RouteTrieNode()
-        return self.children[path_part]
+    return (mn, mx)
 
 
-class Router:
-    def __init__(self, root_handler, not_found_handler):
-        self.trie = RouteTrie()
-        root = self.trie.root
-        root.handler = root_handler
-        self.not_found_handler = not_found_handler
+def test_function(ints):
+    min_and_max = get_min_max(ints)
 
-    def add_handler(self, path, handler):
-        if path is None:
-            return
+    if ints is None or len(ints) == 0:
+        s = (None, None)
+    elif len(ints) == 1:
+        s = (ints[0], ints[0])
+    else:
+        s = sorted(ints)
+        s = (s[0], s[len(s) - 1])
+    # print('m = {}, s = {}'.format(min_and_max, s))
+    if min_and_max == s:
+        print("Pass")
+    else:
+        print("Fail")
 
-        path_list = self.split_path(path)
-        self.trie.insert(path_list, handler)
+# sorted ascending case
+test_function([1, 2, 3, 4, 5, 6])
 
-    def lookup(self, path):
-        if path is None or path.strip() == "":
-            return self.not_found_handler
+# test random input
+import random
+l = [i for i in range(0, 10)]
+random.shuffle(l)
+test_function(l)
 
-        path_list = self.split_path(path)
-        node = self.trie.find(path_list)
-        if node is not None and node.handler is not None:
-            return node.handler
-        else:
-            return self.not_found_handler
+# test empty list
+test_function([])
 
-    def split_path(self, path):
-        path_parts = path.split("/")
-        # filter out extra spaces
-        path_parts = map(lambda x: x.strip(), path_parts)
-        path_parts = filter(lambda x: x != "" ,path_parts)
-        return list(path_parts)
+# test None list
+test_function(None)
 
+# test single element
+test_function([100])
 
-root_handler = "root handler"
-not_found_handler = "not found"
+# test when min and max are same
+test_function([100, 100])
 
-router = Router(root_handler, not_found_handler)
-router.add_handler("/home/about", "about handler")
+# test negative input
+test_function([-100, -100])
 
-index_handler = router.lookup("/")
-# expect root handler
-print(index_handler)
-
-
-not_home_handler = router.lookup("/home")
-# expect not found
-print(not_home_handler)
-
-about_handler = router.lookup("/home/about")
-# expect about handler
-print(about_handler)
-
-
-about_handler_with_slash = router.lookup("/home/about/")
-# expect about handler
-print(about_handler)
-
-none_handler = router.lookup(None)
-# expect not found
-print(none_handler)
-
-me_handler = router.lookup("/home/about/me")
-# expect not found
-print(me_handler)
-
-extra_slashes_handler = router.lookup("/home/about//")
-# expect about handler
-print(extra_slashes_handler)
-
-spaces_in_path_handler = router.lookup("/home/about/ /")
-# expect about handler
-print(spaces_in_path_handler)
+# test negative and positive
+test_function([-100, 1, 1, 1, 1, 1, 1, 1, 1, 100])
 
 
 
